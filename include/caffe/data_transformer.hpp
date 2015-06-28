@@ -87,6 +87,17 @@ class DataTransformer {
    */
   void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
 
+  /**
+   * @brief apply the transformation defined in the layer's transform_param 
+   * to the data
+   * @param datum
+   *    MultiDatum containing the data to be transformed
+   * @param transformed blob
+   *   this is destination blob,it can be part of top blob's data if 
+   *   set_cpu_data() is used. See data_layer.cpp for an example.
+  */ 
+  void Transform( const MultiDatum& datum, Blob<Dtype>* transformed_blob);
+
  protected:
    /**
    * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
