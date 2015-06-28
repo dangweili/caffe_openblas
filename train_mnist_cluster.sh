@@ -3,8 +3,8 @@
 #$ -S /bin/bash
 #$ -cwd
 #$ -N caffe_mnist
-#$ -o ./outresult
-#$ -e ./outerror
+#$ -o ./outresult.out
+#$ -e ./outerror.out
 #$ -q NLPR01
 
 echo "creating mnist dataset"

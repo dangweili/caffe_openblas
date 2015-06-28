@@ -4,7 +4,7 @@
 #$ -cwd
 #$ -j y
 #$ -N GpuInfor
-#$ -o gpu-rate
+#$ -o gpu-rate.out
 #$ -q NLPR01
 
 hostname

@@ -4,7 +4,7 @@
 #$ -cwd
 #$ -j y
 #$ -N makecaffe
-#$ -o makeoutput
+#$ -o makeoutput.out
 #$ -q NLPR01
 
 
