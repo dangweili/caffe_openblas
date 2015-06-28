@@ -37,6 +37,19 @@ message Datum {
   // If true data contains an encoded image that need to be decoded
   optional bool encoded = 7 [default = false];
 }
+// --------MultiDatum could handle multi-label and triplet data storage---------------
+message MultiDatum {
+  optional int32 channels = 1;
+  optional int32 height = 2;
+  optional int32 width = 3;
+  // the actual image data, in bytes
+  optional bytes data = 4;
+  repeated int32 label = 5;
+  // Optionally, the datum could also hold float data.
+  repeated float float_data = 6;
+  // If true data contains an encoded image that need to be decoded
+  optional bool encoded = 7 [default = false];
+}
 
 message FillerParameter {
   // The filler type.
@@ -332,6 +345,8 @@ message LayerParameter {
   optional TanHParameter tanh_param = 127;
   optional ThresholdParameter threshold_param = 128;
   optional WindowDataParameter window_data_param = 129;
+  // ----------------Image count and label count for each image------------------
+  optional MultiDataParameter multidata_param = 132;
 }
 
 // Message that stores parameters used to apply transformation
@@ -429,6 +444,12 @@ message ConvolutionParameter {
     CUDNN = 2;
   }
   optional Engine engine = 15 [default = DEFAULT];
+}
+
+// ----------Message that stores parameters used by MultiDataLayer------------
+message MultiDataParameter {
+  optional int32 image_cnt = 1 [default = 1];
+  optional int32 label_cnt = 2 [default = 2];   
 }
 
 // Message that stores parameters used by DataLayer
