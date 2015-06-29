@@ -419,7 +419,7 @@ int DataTransformer<Dtype>::Rand(int n) {
 // -------------support for the multidata ----------------
 template<typename Dtype>
 void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
-                                        Blob<Dtype>* transformed_blob) {
+                                       Blob<Dtype>* transformed_blob) {
   const int datum_channels = datum.channels();
   const int datum_height = datum.height();
   const int datum_width = datum.width();
@@ -435,7 +435,8 @@ void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
   CHECK_GE(num, 1);
 
   const int crop_size = param_.crop_size();
-
+  // in the future, we could crop the image in row and col independently. 
+  // here, we just follow the previous method, crop the image into squre.  
   if (crop_size) {
     CHECK_EQ(crop_size, height);
     CHECK_EQ(crop_size, width);
@@ -443,16 +444,14 @@ void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
     CHECK_EQ(datum_height, height);
     CHECK_EQ(datum_width, width);
   }
-  
+
   Dtype* transformed_data = transformed_blob->mutable_cpu_data();
-  Transform( datum, transformed_data);
-
+  Transform(datum, transformed_data);
 }
-
-// ------process transform-------------------
 // ------we just process color images for convernent--------
 // one color image has three channels, this should be checked.
 // image_mean should be a N*3 channel image
+
 template<typename Dtype>
 void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
                                        Dtype* transformed_data) {
@@ -469,9 +468,6 @@ void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
   const bool has_mean_values = mean_values_.size() > 0;
     
   // ----------get the image cnt and label cnt-----------------
-  const int img_cnt = param_.img_cnt();
-  const int label_cnt = param.label_cnt();
-
 
   CHECK_GT(datum_channels, 0);
   CHECK_GE(datum_height, crop_size);
@@ -480,14 +476,14 @@ void DataTransformer<Dtype>::Transform(const MultiDatum& datum,
   Dtype* mean = NULL;
   if (has_mean_file) {
     // ----ignore the channels count-------------
-    CHECK_EQ(datum_channels, data_mean_.channels() * img_cnt);
+    // CHECK_EQ(datum_channels, data_mean_.channels() );
     CHECK_EQ(datum_height, data_mean_.height());
     CHECK_EQ(datum_width, data_mean_.width());
     mean = data_mean_.mutable_cpu_data();
   }
 
   if (has_mean_values) {
-    CHECK(mean_values_.size() == 1 || mean_values_.size() == datum_channels/img_cnt ) <<
+    CHECK(mean_values_.size() == 1 || mean_values_.size() == datum_channels ) <<
      "Specify either 1 mean_value or as many as channels: " << datum_channels;
     if (datum_channels > 1 && mean_values_.size() == 1) {
       for (int c = 1; c < datum_channels; ++c) {
