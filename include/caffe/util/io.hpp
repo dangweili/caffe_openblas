@@ -154,6 +154,18 @@ template <typename Dtype>
 void hdf5_save_nd_dataset(
     const hid_t file_id, const string& dataset_name, const Blob<Dtype>& blob);
 
+
+// ---------add support for readimageslist------------
+void ReadImagesList( const string& source,
+    std::vector< std::pair< std::vector<string>, std::vector<int> > >* images_vec, int img_cnt, int label_cnt);
+// ---------read images to datum--------------------
+bool ReadImages( const string& rootPath, const std::vector<string>filenames,
+    const int height, const int width, const bool is_color, MultiDatum* datum);
+// ---------read image to multidatum----------------
+bool ReadImagesToMultiDatum(const string& rootPath, const std::vector<string> filenames, const std::vector<int>labels,
+    const int height, const int width, const bool is_color, MultiDatum* datum);
+
+
 }  // namespace caffe
 
 #endif   // CAFFE_UTIL_IO_H_

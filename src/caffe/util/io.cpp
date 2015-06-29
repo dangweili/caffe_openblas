@@ -303,4 +303,130 @@ void hdf5_save_nd_dataset<double>(
   CHECK_GE(status, 0) << "Failed to make double dataset " << dataset_name;
 }
 
+// -------------load image to multidatum ---------------
+bool ReadImagesToMultiDatum(const string& rootPath, const std::vector<string> filenames, const std::vector<int>labels, 
+    const int height, const int width, const bool is_color, MultiDatum* datum)
+{
+    // clear the orinal data
+    datum->clear_label();
+    datum->clear_data();
+    datum->clear_float_data();
+
+    if( labels.size() > 0 )
+    {
+        if ( ReadImages(rootPath, filenames, height, width, is_color, datum) )
+        {
+            for(int i=0; i < labels.size(); i++)
+            {
+                datum->add_label( labels[i] );
+            }
+            return true;
+        }
+        {
+            return false;
+        } 
+    }
+    else
+    {
+       return ReadImages(rootPath, filenames, height, width, is_color, datum);
+    } 
+}
+
+bool ReadImages( const string& rootPath, const std::vector<string>filenames, 
+    const int height, const int width, const bool is_color, MultiDatum* datum)
+{
+    cv::Mat cv_img;
+    int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR : CV_LOAD_IMAGE_GRAYSCALE);
+    // set datum parameters
+    int num_channels = is_color ? 3 : 1;
+    datum->set_channels( num_channels*filenames.size() );
+    datum->clear_data();
+    datum->clear_float_data();
+    string* datum_string = datum->mutable_data();
+
+    for(unsigned int img_idx=0; img_idx != filenames.size(); img_idx++)
+    {
+        string filename = rootPath + filenames[img_idx];
+        if(height > 0 && width > 0)
+        {
+            cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
+            cv::resize(cv_img_origin, cv_img, cv::Size(height, width));
+            datum->set_height( height );
+            datum->set_width( width );
+        }
+        else
+        {
+            cv_img = cv::imread( filename, cv_read_flag);
+            datum->set_height( cv_img.rows );
+            datum->set_width( cv_img.cols );
+        }
+        if( !cv_img.data )
+        {
+            LOG(ERROR) << "Could not open or find file "<< filename;
+            return false;
+        }
+        if( is_color )
+        {
+            for(int c=0; c < num_channels; ++c)
+            {
+                for(int h = 0; h < cv_img.rows; ++h)
+                {
+                    for( int w = 0; w < cv_img.cols; ++w )
+                    {
+                        datum_string->push_back(
+                            static_cast<char>(cv_img.at<cv::Vec3b>(h,w)[c]));
+                     }
+                }
+            }
+        }
+        else
+        {
+            for(int h = 0; h < cv_img.rows; ++h)
+            {
+                for (int w = 0; w < cv_img.cols; ++w)
+                {
+                    datum_string->push_back(
+                        static_cast<char>(cv_img.at<uchar>(h, w)) );
+                }
+            }
+        }
+    }
+    return true;
+} 
+void ReadImagesList( const string& source, 
+    std::vector< std::pair< std::vector<string>, std::vector<int> > >* images_vec, int img_cnt, int label_cnt)
+{
+    // read the file with filename and labels
+    LOG(INFO) << "Opening file "<< source;
+        std::ifstream infile( source.c_str());
+    std::string line;
+    int line_num = 1;
+    int num_labels = 0;
+    while( std::getline(infile, line) )
+    {
+        std::istringstream iss(line);
+        string filename;
+        std::vector<string> filenames;
+        std::vector<int> labels;
+        int label;
+        for(int i=0; i<img_cnt; i++)
+        {
+            iss >> filename;
+            filenames.push_back( filename );
+        }
+        while( iss >> label )
+        {
+            labels.push_back( label );
+        }
+        // using the first line to check the data
+        if (line_num == 1) num_labels = labels.size();
+        CHECK_EQ( labels.size(), num_labels) <<
+            filename << " error at line "<< line_num << std::endl <<
+            "All image should has the equel label" << std::endl;
+        line_num++;
+        images_vec->push_back( std::make_pair( filenames, labels) );
+    }
+    LOG(INFO) << "Read "<<line_num -1 << " images with "<< num_labels << " labels.";
+}
+
 }  // namespace caffe
