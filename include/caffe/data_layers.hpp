@@ -105,9 +105,9 @@ class DataLayer : public BasePrefetchingDataLayer<Dtype> {
 template <typename Dtype>
 class MultiDataLayer : public BasePrefetchingDataLayer<Dtype> {
  public:
-  explicit DataLayer(const LayerParameter& param)
+  explicit MultiDataLayer(const LayerParameter& param)
       : BasePrefetchingDataLayer<Dtype>(param) {}
-  virtual ~DataLayer();
+  virtual ~MultiDataLayer();
   virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
