@@ -157,7 +157,7 @@ void hdf5_save_nd_dataset(
 
 // ---------add support for readimageslist------------
 void ReadImagesList( const string& source,
-    std::vector< std::pair< std::vector<string>, std::vector<int> > >* images_vec, int img_cnt, int label_cnt);
+    std::vector< std::pair< std::vector<string>, std::vector<int> > >* images_vec, int img_cnt, int label_cnt = 1);
 // ---------read images to datum--------------------
 bool ReadImages( const string& rootPath, const std::vector<string>filenames,
     const int height, const int width, const bool is_color, MultiDatum* datum);
