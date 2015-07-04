@@ -73,9 +73,9 @@ void MultiDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
   if (this->output_labels_) {
     // vector<int> label_shape(1, this->layer_param_.data_param().batch_size());
     // top[1]->Reshape(label_shape);
-    vector<int> label_shape(4);
+    vector<int> label_shape(2);
     label_shape[0] = this->layer_param_.data_param().batch_size();
-    label_shape[0] = datum.label_size();
+    label_shape[1] = datum.label_size();
     top[1]->Reshape( label_shape );
     this->prefetch_label_.Reshape(label_shape);
   }
