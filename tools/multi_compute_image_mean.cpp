@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
   mean_blob.set_height(datum.height());
   mean_blob.set_width(datum.width());
   const int data_size_mean = datum.channels() * datum.height() * datum.width()/img_cnt;
-  for(int i = 0; i < mean_blob.data_size(); i++)
+  for(int i = 0; i < data_size_mean; i++)
   {
     mean_blob.add_data(0.0);
   }

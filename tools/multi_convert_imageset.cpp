@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
     txn->Put(string(key_cstr, length), out);
     // test the label input the db 
     // std::cout << datum.label_size() <<" and "<<out.length() << " labelsize and stringsize"<< std::endl;
+    LOG(INFO) << count << std::endl;
     if (++count % 1000 == 0) {     
       // Commit db
       txn->Commit();
