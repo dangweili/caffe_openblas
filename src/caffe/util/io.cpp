@@ -339,10 +339,30 @@ bool ReadImages( const string& rootPath, const std::vector<string>filenames,
     int cv_read_flag = (is_color ? CV_LOAD_IMAGE_COLOR : CV_LOAD_IMAGE_GRAYSCALE);
     // set datum parameters
     int num_channels = is_color ? 3 : 1;
-    datum->set_channels( num_channels*filenames.size() );
+    int datum_channels = num_channels * filenames.size();
+    int datum_width = 0;
+    int datum_height = 0;
+    int datum_size = 0;
+    int img_size = 0;
+    datum->set_channels( datum_channels );
     datum->clear_data();
     datum->clear_float_data();
-    string* datum_string = datum->mutable_data();
+    if( height > 0 && width > 0)
+    {
+        datum_width = width;
+        datum_height = height;
+    } 
+    else
+    {
+        cv::Mat cv_img_temp = cv::imread(filenames[0], cv_read_flag);
+        datum_width = cv_img_temp.cols;
+        datum_height = cv_img_temp.rows;
+    }
+    datum->set_height( datum_height );
+    datum->set_width( datum_width );
+    datum_size = datum_channels*datum_height*datum_width;
+    img_size = datum_size/filenames.size();
+    std::string buffer(datum_size, ' ');
 
     for(unsigned int img_idx=0; img_idx != filenames.size(); img_idx++)
     {
@@ -351,14 +371,10 @@ bool ReadImages( const string& rootPath, const std::vector<string>filenames,
         {
             cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
             cv::resize(cv_img_origin, cv_img, cv::Size(height, width));
-            datum->set_height( height );
-            datum->set_width( width );
         }
         else
         {
             cv_img = cv::imread( filename, cv_read_flag);
-            datum->set_height( cv_img.rows );
-            datum->set_width( cv_img.cols );
         }
         if( !cv_img.data )
         {
@@ -367,30 +383,32 @@ bool ReadImages( const string& rootPath, const std::vector<string>filenames,
         }
         if( is_color )
         {
-            for(int c=0; c < num_channels; ++c)
-            {
-                for(int h = 0; h < cv_img.rows; ++h)
-                {
-                    for( int w = 0; w < cv_img.cols; ++w )
-                    {
-                        datum_string->push_back(
-                            static_cast<char>(cv_img.at<cv::Vec3b>(h,w)[c]));
-                     }
+            for (int h = 0; h < datum_height; ++h) {
+                const uchar* ptr = cv_img.ptr<uchar>(h);
+                int img_index = 0;
+                for (int w = 0; w < datum_width; ++w) {
+                   for (int c = 0; c < num_channels; ++c) {
+                        int datum_index = img_idx*img_size + (c * datum_height + h) * datum_width + w;
+                        buffer[datum_index] = static_cast<char>(ptr[img_index++]);
+                    }
                 }
             }
         }
         else
         {
-            for(int h = 0; h < cv_img.rows; ++h)
-            {
-                for (int w = 0; w < cv_img.cols; ++w)
-                {
-                    datum_string->push_back(
-                        static_cast<char>(cv_img.at<uchar>(h, w)) );
+            for( int h=0; h < datum_height; h++){
+                const uchar* ptr = cv_img.ptr<uchar>(h);
+                int img_index = 0;
+                for (int w = 0; w < datum_width; ++w) {
+                    for( int c = 0; c < num_channels; ++c) {
+                        int datum_index = img_idx*img_size + (c * datum_height + h) * datum_width + w;
+                        buffer[datum_index] = static_cast<char>(ptr[img_index++]);
+                    }
                 }
             }
         }
     }
+    datum->set_data(buffer);
     return true;
 } 
 void ReadImagesList( const string& source, 
