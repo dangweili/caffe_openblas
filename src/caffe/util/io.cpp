@@ -354,7 +354,7 @@ bool ReadImages( const string& rootPath, const std::vector<string>filenames,
     } 
     else
     {
-        cv::Mat cv_img_temp = cv::imread(filenames[0], cv_read_flag);
+        cv::Mat cv_img_temp = cv::imread(rootPath + filenames[0], cv_read_flag);
         datum_width = cv_img_temp.cols;
         datum_height = cv_img_temp.rows;
     }
@@ -370,7 +370,7 @@ bool ReadImages( const string& rootPath, const std::vector<string>filenames,
         if(height > 0 && width > 0)
         {
             cv::Mat cv_img_origin = cv::imread(filename, cv_read_flag);
-            cv::resize(cv_img_origin, cv_img, cv::Size(height, width));
+            cv::resize(cv_img_origin, cv_img, cv::Size(width, height));
         }
         else
         {
