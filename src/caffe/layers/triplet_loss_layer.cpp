@@ -85,7 +85,7 @@ void TripletLossLayer<Dtype>::Forward_cpu(
         diff_pn_.mutable_cpu_data()); //p-n
     const int channels = bottom[0]->channels();
     Dtype margin = this->layer_param_.triplet_loss_param().margin();
-    
+   
     Dtype loss(0.0);
     for (int i = 0; i < bottom[0]->num(); i++)
     {
@@ -96,13 +96,14 @@ void TripletLossLayer<Dtype>::Forward_cpu(
         // Dtype mdist = sampleW[i]*std::max(margin + dist_sq_ap_.cpu_data()[i] - dist_sq_an_.cpu_data()[i], Dtype(0.0));
         Dtype mdist = std::max(margin + dist_sq_ap_.cpu_data()[i] - dist_sq_an_.cpu_data()[i], Dtype(0.0));
         loss += mdist;
+        /*
         if( mdist == Dtype(0)) {
             // prepare for backward pass
             caffe_set(channels, Dtype(0), diff_ap_.mutable_cpu_data() + (i*channels));
             caffe_set(channels, Dtype(0), diff_an_.mutable_cpu_data() + (i*channels));
             caffe_set(channels, Dtype(0), diff_pn_.mutable_cpu_data() + (i*channels));
         }
-           
+        */ 
     }
     loss = loss / static_cast<Dtype>(bottom[0]->num()) / Dtype(2);
     top[0]->mutable_cpu_data()[0] = loss;
@@ -121,36 +122,76 @@ void TripletLossLayer<Dtype>::Backward_cpu( const vector<Blob<Dtype>*>& top,
             int num = bottom[i]->num();
             int channels = bottom[i]->channels();
             Dtype* bout = bottom[i]->mutable_cpu_diff();
-            
+            Dtype margin = this->layer_param_.triplet_loss_param().margin();
+            Dtype mdist = Dtype(0.0);
             for (int j = 0; j < num; j++)
             {
+
+                mdist = std::max(margin + dist_sq_ap_.cpu_data()[j] - dist_sq_an_.cpu_data()[j], Dtype(0.0));
                 if( i == 0 )
                 {
-                    caffe_cpu_axpby(
-                        channels,
-                        // alpha*sampleW[j]
-                        alpha,
-                        diff_pn_.cpu_data() + (j*channels),
-                        Dtype(0.0),
-                        bout + (j*channels));
+                    if( mdist > 0 )
+                    {
+                        caffe_cpu_axpby(
+                            channels,
+                            // alpha*sampleW[j]
+                            alpha,
+                            diff_pn_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
+                    else 
+                    {
+                        caffe_cpu_axpby(
+                            channels,
+                            Dtype(0.0),
+                            diff_pn_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
                 }
                 else if (i == 1)
                 {
-                    caffe_cpu_axpby(
-                        channels,
-                        alpha, // alpha*sampleW[j]
-                        diff_ap_.cpu_data() + (j*channels),
-                        Dtype(0.0),
-                        bout + (j*channels));
+                    if(mdist > 0)
+                    {
+                        caffe_cpu_axpby(
+                            channels,
+                            alpha, // alpha*sampleW[j]
+                            diff_ap_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
+                    else
+                    {
+                        caffe_cpu_axpby(
+                            channels,
+                            Dtype(0.0),
+                            diff_ap_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
                 }
                 else if (i == 2)
                 {
-                    caffe_cpu_axpby(
-                        channels,
-                        alpha, // alpha*sampleW[j]
-                        diff_an_.cpu_data() + (j*channels),
-                        Dtype(0.0),
-                        bout + (j*channels));
+                    if( mdist > 0)
+                    {
+    
+                        caffe_cpu_axpby(
+                            channels,
+                            alpha, // alpha*sampleW[j]
+                            diff_an_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
+                    else
+                    {
+                        caffe_cpu_axpby(
+                            channels,
+                            Dtype(0.0),
+                            diff_an_.cpu_data() + (j*channels),
+                            Dtype(0.0),
+                            bout + (j*channels));
+                    }
                 }
             }// end num     
         }  // end propagate_down[i] 

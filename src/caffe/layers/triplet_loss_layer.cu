@@ -41,7 +41,7 @@ void TripletLossLayer<Dtype>::Forward_gpu(
         diff_sq_ap_.mutable_gpu_data()); // ||a - p||2
     caffe_gpu_powx(
         count,
-        diff_sq_an_.mutable_gpu_data(),
+        diff_an_.mutable_gpu_data(),
         Dtype(2),
         diff_sq_an_.mutable_gpu_data()); // ||a - n||2
 
@@ -104,6 +104,7 @@ __global__ void CLLBackward( const int count, const int channels,
 template <typename Dtype>
 void TripletLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top, 
     const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom) {
+
     Dtype margin = this->layer_param_.triplet_loss_param().margin();
     const int count = bottom[0]->count();
     const int channels = bottom[0]->channels();
@@ -120,7 +121,7 @@ void TripletLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
                     count, channels, margin, alpha, 
                     /* bottom[3]->gpu_data(), */
                     diff_pn_.gpu_data(), // the cache eltwise difference between p and n
-                    diff_sq_ap_.gpu_data(), // the cached square distance between a and p
+                    dist_sq_ap_.gpu_data(), // the cached square distance between a and p
                     dist_sq_an_.gpu_data(), // the cached square distance between a and n
                     bottom[i]->mutable_gpu_diff()
                 );
@@ -131,7 +132,7 @@ void TripletLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
                     count, channels, margin, alpha, 
                     /* bottom[3]->gpu_data(), */
                     diff_ap_.gpu_data(), // the cache eltwise difference between a and p
-                    diff_sq_ap_.gpu_data(), // the cached square distance between a and p
+                    dist_sq_ap_.gpu_data(), // the cached square distance between a and p
                     dist_sq_an_.gpu_data(), // the cached square distance between a and n
                     bottom[i]->mutable_gpu_diff()
                 );
@@ -142,7 +143,7 @@ void TripletLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
                     count, channels, margin, alpha, 
                     /* bottom[3]->gpu_data(), */
                     diff_an_.gpu_data(), // the cache eltwise difference between a and n
-                    diff_sq_ap_.gpu_data(), // the cached square distance between a and p
+                    dist_sq_ap_.gpu_data(), // the cached square distance between a and p
                     dist_sq_an_.gpu_data(), // the cached square distance between a and n
                     bottom[i]->mutable_gpu_diff()
                 );

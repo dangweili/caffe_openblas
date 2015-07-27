@@ -3,6 +3,11 @@
 this file is reference to tangwei
 
 */
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -22,9 +27,9 @@ class TripletLossLayerTest : public MultiDeviceTest<TypeParam> {
 
     protected:
         TripletLossLayerTest()
-            : blob_bottom_data_i_( new Blob<Dtype>(256, 10, 1, 1)),
-              blob_bottom_data_j_( new Blob<Dtype>(256, 10, 1, 1)),
-              blob_bottom_data_k_( new Blob<Dtype>(256, 10, 1, 1)),
+            : blob_bottom_data_i_( new Blob<Dtype>(100, 20, 1, 1)),
+              blob_bottom_data_j_( new Blob<Dtype>(100, 20, 1, 1)),
+              blob_bottom_data_k_( new Blob<Dtype>(100, 20, 1, 1)),
               // blob_bottom_y_( new Blob<Dtype>(512, 1, 1, 1)),
               blob_top_loss_( new Blob<Dtype>()) {
             // fill the values
@@ -76,11 +81,11 @@ TYPED_TEST( TripletLossLayerTest, TestForward){
     const Dtype margin = layer_param.triplet_loss_param().margin();
     const int num = this->blob_bottom_data_i_->num();
     const int channels = this->blob_bottom_data_i_->channels();
-    Dtype loss(0);
+    Dtype loss(0.0);
     for (int i = 0; i < num; i++)
     {
-        Dtype dist_sq_ij(0);
-        Dtype dist_sq_ik(0);
+        Dtype dist_sq_ij(0.0);
+        Dtype dist_sq_ik(0.0);
         for( int j = 0; j < channels; j++)
         {
             Dtype diff_ij = this->blob_bottom_data_i_->cpu_data()[i*channels+j] - 
@@ -88,11 +93,11 @@ TYPED_TEST( TripletLossLayerTest, TestForward){
             dist_sq_ij += diff_ij*diff_ij;
             Dtype diff_ik = this->blob_bottom_data_i_->cpu_data()[i*channels+j] -
                     this->blob_bottom_data_k_->cpu_data()[i*channels+j];
-            dist_sq_ik = diff_ik*diff_ik;
+            dist_sq_ik += diff_ik*diff_ik;
         }
         loss += std::max(Dtype(0.0), margin + dist_sq_ij - dist_sq_ik);
     } 
-    loss /= static_cast<Dtype>(num) *  Dtype(2);
+    loss /= static_cast<Dtype>(num)*Dtype(2);
     EXPECT_NEAR(this->blob_top_loss_->cpu_data()[0], loss, 1e-6); 
 }
 
