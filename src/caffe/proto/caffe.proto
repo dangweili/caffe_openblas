@@ -269,6 +269,13 @@ message ParamSpec {
   optional float decay_mult = 4 [default = 1.0];
 }
 
+//-----------add triplet loss layer parameters-------------------
+message TripletLossParameter{
+    // margin for disimilar pair
+    optional float margin = 1 [default = 1.0];
+    
+}
+
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
@@ -347,6 +354,7 @@ message LayerParameter {
   optional WindowDataParameter window_data_param = 129;
   // ----------------Image count and label count for each image------------------
   optional MultiDataParameter multidata_param = 132;
+  optional TripletLossParameter triplet_loss_param = 133;
 }
 
 // Message that stores parameters used to apply transformation
