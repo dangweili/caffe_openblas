@@ -808,6 +808,45 @@ class TripletLossLayer: public LossLayer<Dtype> {
         Blob<Dtype> dist_binary_; // tmp storage for gpu forward pass
 };
 
+// ---add multilabel sigmoid cross entropy loss function -------
+template <typename Dtype>
+class MultiLabelLossLayer: public LossLayer<Dtype> {
+    public:
+        explicit MultiLabelLossLayer( const LayerParameter& param)
+            :LossLayer<Dtype>(param),
+                sigmoid_layer_(new SigmoidLayer<Dtype>(param)),
+                sigmoid_output_(new Blob<Dtype>()){}
+        virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+        virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
+            const vector<Blob<Dtype>*>& top);
+
+        virtual inline const char* type() const { return "MultiLabelLoss"; }
+        virtual inline int MaxTopBlobs() const { return 2;}
+        virtual inline int ExactNumBottomBlobs() const { return 2;}
+        
+        virtual inline bool AllowForceBackward( const int bottom_index) const {
+            return bottom_index != 1;
+        }
+        
+    protected:
+        virtual void Forward_cpu( const vector<Blob<Dtype>*>& bottom,
+                const vector<Blob<Dtype>*>& top);
+        virtual void Forward_gpu( const vector<Blob<Dtype>*>& bottom,
+                const vector<Blob<Dtype>*>& top);
+
+        virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+                const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+        virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+                const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
+       
+        shared_ptr< SigmoidLayer<Dtype> > sigmoid_layer_;
+        shared_ptr< Blob<Dtype> > sigmoid_output_;
+        vector<Blob<Dtype>*> sigmoid_bottom_vec_;
+        vector<Blob<Dtype>*> sigmoid_top_vec_;
+};
+
+
 }  // namespace caffe
 
 #endif  // CAFFE_LOSS_LAYERS_HPP_
