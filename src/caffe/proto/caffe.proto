@@ -272,8 +272,13 @@ message ParamSpec {
 //-----------add triplet loss layer parameters-------------------
 message TripletLossParameter{
     // margin for disimilar pair
-    optional float margin = 1 [default = 1.0];
-    
+    optional float margin = 1 [default = 1.0];  
+}
+
+// ---------add multilabel loss layer parameters----------------
+message MultiLabelLossParameter{
+    // weight for different attributes
+    repeated float weight = 1; //set all the label's weight  
 }
 
 // NOTE
@@ -355,6 +360,8 @@ message LayerParameter {
   // ----------------Image count and label count for each image------------------
   optional MultiDataParameter multidata_param = 132;
   optional TripletLossParameter triplet_loss_param = 133;
+  // ----------------multilabel sigmoid cross entropy loss function-------------
+  optional MultiLabelLossParameter multilabel_loss_param = 134;
 }
 
 // Message that stores parameters used to apply transformation
