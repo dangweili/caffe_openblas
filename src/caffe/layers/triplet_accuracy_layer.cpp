@@ -52,7 +52,7 @@ void TripletAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom
             diff_ap_.cpu_data() + i*channels, diff_ap_.cpu_data() + i*channels);
         sum_an = caffe_cpu_dot(channels,
             diff_an_.cpu_data() + i*channels, diff_an_.cpu_data() + i*channels);
-        diff_sq_.mutable_cpu_data()[i] = margin_ + sum_ap - sum_an > 0 ? 1 : 0;
+        diff_sq_.mutable_cpu_data()[i] = margin_ + sum_ap - sum_an > 0 ? 0 : 1;
     }
     // accuracy
     Dtype accuracy = caffe_cpu_dot(bottom[0]->num(),
