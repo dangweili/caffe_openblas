@@ -280,7 +280,11 @@ message MultiLabelLossParameter{
     // weight for different attributes
     repeated float weight = 1; //set all the label's weight  
 }
-
+// ------------add triplet accuracy-------------
+message TripletAccuracyParameter{
+    // margin for disimilar pair
+    optional float margin = 1 [default = 1.0];
+}
 // NOTE
 // Update the next available ID when you add a new LayerParameter field.
 //
@@ -362,6 +366,8 @@ message LayerParameter {
   optional TripletLossParameter triplet_loss_param = 133;
   // ----------------multilabel sigmoid cross entropy loss function-------------
   optional MultiLabelLossParameter multilabel_loss_param = 134;
+  // ---------------- add triplet accuracy ---------------------
+  optional TripletAccuracyParameter triplet_accuracy_param = 135;
 }
 
 // Message that stores parameters used to apply transformation
