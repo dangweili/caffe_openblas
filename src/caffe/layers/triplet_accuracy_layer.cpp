@@ -24,7 +24,7 @@ void TripletAccuracyLayer<Dtype>::Reshape(
     diff_an_.Reshape(bottom[0]->num(), bottom[0]->channels(), 1, 1);
     summer_vec_.Reshape(bottom[0]->channels(), 1, 1, 1);
     diff_sq_.Reshape(bottom[0]->num(), 1, 1, 1);
-    for (int i = 0; i < bottom[0]->channels(); i++)
+    for (int i = 0; i < bottom[0]->num(); i++)
         summer_vec_.mutable_cpu_data()[i] = 1;
     top[0]->Reshape(1,1,1,1);
 }
