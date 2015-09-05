@@ -141,8 +141,13 @@ int main(int argc, char** argv) {
       }
     }
     // sequential
+    string key = "";
+    for (int i=0; i<lines[line_id].first.size(); i++)
+        key = key+lines[line_id].first[i];
+
     int length = snprintf(key_cstr, kMaxKeyLength, "%08d_%s", line_id,
-        lines[line_id].first[0].c_str());  // sequential the datum, return the length, each line is a new record
+        key.c_str());
+//        lines[line_id].first[0].c_str());  // sequential the datum, return the length, each line is a new record
 
     // Put in db
     string out;
