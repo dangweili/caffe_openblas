@@ -119,12 +119,12 @@ int feature_extraction_pipeline(int argc, char** argv) {
   }
 
   int num_mini_batches = atoi(argv[++arg_pos]);
-
+  ++arg_pos;
   std::vector<shared_ptr<db::DB> > feature_dbs;
   std::vector<shared_ptr<db::Transaction> > txns;
   for (size_t i = 0; i < num_features; ++i) {
     LOG(INFO)<< "Opening dataset " << dataset_names[i];
-    shared_ptr<db::DB> db(db::GetDB(argv[++arg_pos]));
+    shared_ptr<db::DB> db(db::GetDB(argv[arg_pos]));
     db->Open(dataset_names.at(i), db::NEW);
     feature_dbs.push_back(db);
     shared_ptr<db::Transaction> txn(db->NewTransaction());
