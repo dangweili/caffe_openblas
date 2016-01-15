@@ -32,6 +32,7 @@ class Transaction {
   Transaction() { }
   virtual ~Transaction() { }
   virtual void Put(const string& key, const string& value) = 0;
+  virtual void Get(const string& key, string& value) = 0;
   virtual void Commit() = 0;
 
   DISABLE_COPY_AND_ASSIGN(Transaction);
@@ -69,6 +70,9 @@ class LevelDBTransaction : public Transaction {
   explicit LevelDBTransaction(leveldb::DB* db) : db_(db) { CHECK_NOTNULL(db_); }
   virtual void Put(const string& key, const string& value) {
     batch_.Put(key, value);
+  }
+  virtual void Get(const string& key, string& value){
+    // to be impleted in the future 
   }
   virtual void Commit() {
     leveldb::Status status = db_->Write(leveldb::WriteOptions(), &batch_);
@@ -152,6 +156,7 @@ class LMDBTransaction : public Transaction {
   explicit LMDBTransaction(MDB_dbi* mdb_dbi, MDB_txn* mdb_txn)
     : mdb_dbi_(mdb_dbi), mdb_txn_(mdb_txn) { }
   virtual void Put(const string& key, const string& value);
+  virtual void Get(const string& key, string& value);
   virtual void Commit() { MDB_CHECK(mdb_txn_commit(mdb_txn_)); }
 
  private:

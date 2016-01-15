@@ -9,11 +9,11 @@
 
 
 echo "make clean now..."
-make clean
+#make clean
 echo "make caffe now..."
 make all -j16
 echo "make test test caffe now..."
-make test
+make test -j32
 echo "make runtest now..."
 make runtest
 echo "finish make caffe now.."
