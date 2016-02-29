@@ -16,8 +16,8 @@ fi
 LOG=`basename $1`
 grep -B 1 'Test ' $1 > aux.txt
 grep 'Iteration ' aux.txt | sed  's/.*Iteration \([[:digit:]]*\).*/\1/g' > aux0.txt
-grep 'Test net output #0' aux.txt | awk '{print $11}' > aux1.txt
-grep 'Test net output #1' aux.txt | awk '{print $11}' > aux2.txt
+grep 'Test net output #18' aux.txt | awk '{print $11}' > aux1.txt
+grep 'Test net output #19' aux.txt | awk '{print $11}' > aux2.txt
 
 # Extracting elapsed seconds
 # For extraction of time since this line contains the start time

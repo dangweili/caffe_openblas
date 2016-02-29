@@ -265,6 +265,31 @@ class ImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
   int lines_id_;
 };
 
+// add the multi-label suport for MultiImageDataLayer
+template <typename Dtype>
+class MultiImageDataLayer : public BasePrefetchingDataLayer<Dtype> {
+ public:
+  explicit MultiImageDataLayer(const LayerParameter& param)
+      : BasePrefetchingDataLayer<Dtype>(param) {}
+  virtual ~MultiImageDataLayer();
+  virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
+
+  virtual inline const char* type() const { return "MultiImageData"; }
+  virtual inline int ExactNumBottomBlobs() const { return 0; }
+  //virtual inline int ExactNumTopBlobs() const { return 2; }
+  virtual inline int MinTopBlobs() const { return 1; }
+  virtual inline int MaxTopBlobs() const { return 2; }
+
+ protected:
+  shared_ptr<Caffe::RNG> prefetch_rng_;
+  virtual void ShuffleImages();
+  virtual void InternalThreadEntry();
+
+  vector<std::pair<std::string, vector<int> > > lines_;
+  int lines_id_;
+};
+
 /**
  * @brief Provides data to the Net from memory.
  *
